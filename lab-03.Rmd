@@ -1,6 +1,6 @@
 ---
 title: "Lab 03 - Take a sad plot and make it better"
-author: "User1, User2, User3 and User4 - Team Name"
+author: "Alex Lee"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -72,13 +72,17 @@ staff <- read_csv("data/instructional-staff.csv")
 
 What is the difference between *wide format* data and *long format* data?
 
+long format consists of each column as a variable, with rows as observations,
+wide format is when an data is when there is one observation row per subject,
+with each measurement as a variable.
 
 Is the format `staff` data *wide* or *long*?
 
+wide format
 
 How many observations are there in the data set?
 
-
+11 observations
 
 
 ## Exercise 2
@@ -86,12 +90,13 @@ How many observations are there in the data set?
 ```{r pivoting}
 ## Uncomment and complete the following code
 
-#staff_long <- ___ %>%
-#  ___(
-#    cols = ____, 
-#    names_to = "_____",
-#    values_to = "percent"
-#    )
+staff_long <- staff %>%
+  pivot_longer(
+    cols = c("1975","1989","1993","1999","2001","2003","2005"
+             ,"2007","2009","2011"),
+    names_to = "year",
+    values_to = "percent"    )
+
 
 ```
 
@@ -100,6 +105,11 @@ How many observations are there in the data set?
 
 ```{r dot-plot}
 # Write your code for Exercise 3 here
+
+ggplot(data = staff_long, mapping = aes( x = year,
+                                         y = percent,
+                                         color = faculty_type)) +
+  geom_point()
 
 
 
@@ -110,8 +120,10 @@ How many observations are there in the data set?
 ```{r bad-line-plot}
 # Write your code for Exercise 4 here
 
-
-
+ggplot(data = staff_long, mapping = aes(x = year,
+                                        y = percent,
+                                        color = faculty_type)) +
+  geom_line()
 ```
 
 ## Exercise 5
@@ -119,15 +131,19 @@ How many observations are there in the data set?
 ```{r mutate-year}
 ## Uncomment and complete the following code
 
-#staff_long <- staff_long %>%
-#  mutate(year = ______(year))
-```
+staff_long <- staff_long %>%
+  mutate(year = as.numeric(year))
 
 
-```{r working-line-plot}
+
+
 # Write your code for Exercise 5 here
 
-
+ggplot(data=staff_long, mapping = aes(x = year,
+                                      y = percent,
+                                      color = faculty_type)) +
+  geom_line()
+```
 
 ```
 
@@ -136,7 +152,13 @@ How many observations are there in the data set?
 ```{r better-line-plot}
 # Write your code for Exercise 6 here
 
-
+ggplot(data = staff_long, mapping = aes(x = year, 
+   y = percent,
+   color = faculty_type)) + geom_line() + 
+   labs(title = "Proportion of Faculty over the years", 
+   color = "Faculty Type",
+   x ="Years",
+   y = "Proportion of staff")
 
 
 ```
@@ -145,9 +167,9 @@ How many observations are there in the data set?
 
 _Write below your ideas for adapting the line plot_
 
-* Idea 1
-* Idea 2
-* Idea 3
+* mutate new variablefro all full time employees
+* specify the color as either full time or partime
+* Highlight part Time
 * ...
 
 
@@ -156,7 +178,20 @@ _Write below your ideas for adapting the line plot_
 ```{r implement-Ex7}
 # Write your code for Exercise 8 here
 
+staff_long <- staff_long %>%
+  mutate( part_time = 
+  case_when( faculty_type == "Part_Time Faculty" ~ "Part-Time Faculty",
+    TRUE ~ "Other Faculty Types"))
 
-
+ggplot(data = staff_long, 
+ mapping = aes(x = year,
+               y =  percent,
+               group = faculty_type,
+               color = part_time)) + 
+ geom_line() + scale_color_manual(values = c("gray","red"))
+ labs(title = "Instructional Staff Employment Trends, 1975-2011",
+  x = "Years", 
+  y = "Proportion of staff")
 ```
+
 
